@@ -1,0 +1,27 @@
+# bash completion for openstack gnocchi
+
+_gnocchi_opts="" # lazy init
+_gnocchi_flags="" # lazy init
+_gnocchi_opts_exp="" # lazy init
+_gnocchi()
+{
+    local cur prev kbc
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    if [ "x$_gnocchi_opts" == "x" ] ; then
+        kbc="`gnocchi bash-completion | sed -e "s/ -h / /"`"
+        _ceilometer_opts="`echo "$kbc" | sed -e "s/--[a-z0-9_-]*//g" -e "s/[ ][ ]*/ /g"`"
+        _gnocchi_flags="`echo " $kbc" | sed -e "s/ [^-][^-][a-z0-9_-]*//g" -e "s/[ ][ ]*/ /g"`"
+        _gnocchi_opts_exp="`echo $_gnocchi_opts | sed -e "s/[ ]/|/g"`"
+    fi
+
+    if [[ " ${COMP_WORDS[@]} " =~ " "($_gnocchi_opts_exp)" " && "$prev" != "help" ]] ; then
+        COMPREPLY=($(compgen -W "${_gnocchi_flags}" -- ${cur}))
+    else
+        COMPREPLY=($(compgen -W "${_gnocchi_opts}" -- ${cur}))
+    fi
+    return 0
+}
+complete -F _gnocchi gnocchi
